@@ -8,10 +8,19 @@
     </head>
     <body>
         <h1>This is Open Addresses UK's address entry playground</h1>
+        <input type="text" id="searchBox" style="width: 600px;" onkeyup="searchTextBox()">
+        <div id="results"></div>
         <script>
-            calculateSearchCombinations("22 greenway berkhamsted hp43jd", function (err, data) {
-                console.log(data);
-            });
+            var latestSetTimeout = null;
+            var searchTextBox = function () {
+                clearTimeout(latestSetTimeout);
+                latestSetTimeout = setTimeout(function () {
+                    searchCombinations($("#searchBox").val(), function (err, data) {
+                        console.log(data);
+                        $("#results").html(data.map(function (x) { return JSON.stringify(x); }).join("<br>"));
+                    });
+                }, 1000);
+            };
         </script>
     </body>
 </html>

@@ -71,31 +71,44 @@ var calculateSearchCombinations = function (freeText, callback) {
     freeText = freeText.toUpperCase();
     // search for a postcode (or more than one!)
     var postcodes = freeText.match(/([A-PR-UWYZ0-9][A-HK-Y0-9][AEHMNPRTVXY0-9]?[ABEHMNPRVWXY0-9]? *[0-9][ABD-HJLN-UW-Z]{2}|GIR 0AA)/g);
-    // remove the postcodes from the original string
-    postcodes.forEach(function (p) { freeText = freeText.replace(new RegExp(p), ""); });
-    // rationalise the postcodes I've found
-    postcodes = _.unique(postcodes.map(function (x) { return x.replace(/ */g, ""); }));
+    if (postcodes) {
+        // remove the postcodes from the original string
+        postcodes.forEach(function (p) { freeText = freeText.replace(new RegExp(p), ""); });
+        // rationalise the postcodes I've found
+        postcodes = _.unique(postcodes.map(function (x) { return x.replace(/ */g, ""); }));
+    }
     // search for numbers
     var numbers = freeText.match(/\d+[A-Z]?/g);
-    // remove the numbers from the original string
-    numbers.forEach(function (p) { freeText = freeText.replace(new RegExp(p), ""); });
-    // rationalise the numbers I've found
-    numbers = _.unique(numbers);
+    if (numbers) {
+        // remove the numbers from the original string
+        numbers.forEach(function (p) { freeText = freeText.replace(new RegExp(p), ""); });
+        // rationalise the numbers I've found
+        numbers = _.unique(numbers);
+    }
     freeText = _.without(freeText.split(/ +/), "");
-    var combinations = _.flatten(postcodes.map(function (p) {
-        return permutate(freeText, 2, 2).map(function (x) { return { 'street': x[0], 'town': x[1], 'postcode': p }; });
-    }), true);
-    var combinations = _.flatten(combinations.map(function (c) {
-        return numbers.map(function (n) {
-            var temp = JSON.parse(JSON.stringify(c));
-            temp.paon = n;
-            return temp;
-        }).concat(numbers.map(function (n) {
-            var temp = JSON.parse(JSON.stringify(c));
-            temp.saon = n;
-            return temp;
-        }));
-    }), true);
+    var combinations = _.flatten(permutate(freeText, 2, 2).map(function (x) { return { 'street': x[0], 'town': x[1] }; }), true);
+    if (postcodes) {
+        combinations = _.flatten(combinations.map(function (c) {
+            return postcodes.map(function (p) {
+                var temp = JSON.parse(JSON.stringify(c));
+                temp.postcode = p;
+                return temp;
+            });
+        }), true);
+    }
+    if (numbers) {
+        combinations = _.flatten(combinations.map(function (c) {
+            return numbers.map(function (n) {
+                var temp = JSON.parse(JSON.stringify(c));
+                temp.pao = n;
+                return temp;
+            }).concat(numbers.map(function (n) {
+                var temp = JSON.parse(JSON.stringify(c));
+                temp.sao = n;
+                return temp;
+            }));
+        }), true);
+    }
     callback(null, combinations);
 }
 
@@ -105,7 +118,13 @@ var searchCombinations = function (freeText, callback) {
             console.log("Searching for " + JSON.stringify(searchRequest));
             search(searchRequest, callback)
         }, function (err, results) {
-            callback(err, _.unique(_.flatten(results, true), false, function (x) { return x.url; }));
+            results = _.unique(_.flatten(results, true), false, function (x) { return x.url; })
+                .filter(function (r) {
+                    return _.find(combinations, function (c) {
+                        return (!c.pao && !c.sao) || (c.pao === r.pao) || (c.sao === r.sao);
+                    });
+                });
+            callback(err, results);
         });
     });
 }
