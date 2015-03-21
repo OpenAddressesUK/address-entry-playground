@@ -36,6 +36,7 @@ var fetchJSON = function (url, callback) {
         output = data;
     })
     .done(function() {
+        console.log("Fetching " + url + "...");
         callback(null, output);
     })
     .fail(function() {
