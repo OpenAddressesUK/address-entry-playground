@@ -1,8 +1,17 @@
 <html>
     <head>
         <title>Open Addresses UK's address entry playground</title>
+        <script src="bower_components/underscore/underscore-min.js"></script>
+        <script src="bower_components/jquery/dist/jquery.min.js"></script>
+        <script src="bower_components/async/lib/async.js"></script>
+        <script src="index.js"></script>
     </head>
     <body>
         <h1>This is Open Addresses UK's address entry playground</h1>
+        <script>
+            calculateSearchCombinations("22 greenway berkhamsted hp43jd", function (err, data) {
+                console.log(data);
+            });
+        </script>
     </body>
 </html>
