@@ -17,7 +17,15 @@
                 latestSetTimeout = setTimeout(function () {
                     searchCombinations($("#searchBox").val(), function (err, data) {
                         console.log(data);
-                        $("#results").html(data.map(function (x) { return JSON.stringify(x); }).join("<br>"));
+                        $("#results").html("<ul>\n" + data.map(function (x) {
+                            return "    <li>"
+                                + (x.pao ? x.pao : "")
+                                + (x.sao ? x.sao : "")
+                                + (x.street ? x.street : "")
+                                + (x.locality ? x.locality : "")
+                                + (x.town ? x.town : "")
+                                + (x.postcode ? x.postcode : "");
+                        }).join("\n") + "</ul>\n");
                     });
                 }, 1000);
             };
