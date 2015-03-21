@@ -11,23 +11,27 @@
         <input type="text" id="searchBox" style="width: 600px;" onkeyup="searchTextBox()">
         <div id="results"></div>
         <script>
-            var latestSetTimeout = null;
+            var latestSetTimeout = null,
+                latestSearch = null;
             var searchTextBox = function () {
                 clearTimeout(latestSetTimeout);
-                latestSetTimeout = setTimeout(function () {
-                    searchCombinations($("#searchBox").val(), function (err, data) {
-                        console.log(data);
-                        $("#results").html("<ul>\n" + data.map(function (x) {
-                            return "    <li>"
-                                + (x.pao ? x.pao : "")
-                                + (x.sao ? x.sao : "")
-                                + (x.street ? x.street : "")
-                                + (x.locality ? x.locality : "")
-                                + (x.town ? x.town : "")
-                                + (x.postcode ? x.postcode : "");
-                        }).join("\n") + "</ul>\n");
-                    });
-                }, 1000);
+                if ($("#searchBox").val().trim() !== latestSearch) {
+                    latestSearch = $("#searchBox").val().trim();
+                    latestSetTimeout = setTimeout(function () {
+                        searchCombinations(latestSearch, function (err, data) {
+                            console.log(data);
+                            $("#results").html("<ul>\n" + data.map(function (x) {
+                                return "    <li>"
+                                    + (x.pao ? x.pao : "")
+                                    + (x.sao ? x.sao : "")
+                                    + (x.street ? x.street : "")
+                                    + (x.locality ? x.locality : "")
+                                    + (x.town ? x.town : "")
+                                    + (x.postcode ? x.postcode : "");
+                            }).join("\n") + "</ul>\n");
+                        });
+                    }, 1000);
+                }
             };
         </script>
     </body>
